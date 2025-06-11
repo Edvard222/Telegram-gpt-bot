@@ -7,8 +7,8 @@ from moysklad import get_purchases
 from reports import generate_report
 
 load_dotenv()
-TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
-PROXY_API_KEY = os.getenv("PROXY_API_KEY")
+TELEGRAM_TOKEN = os.getenv("8075075075:AAHMDK-iHkY2K9ZFDQBd3JXc25pP0U5Pv44")
+PROXY_API_KEY = os.getenv("sk-NXVc98OWiPlnqx2ufTlsPSW93CX2Fx6I")
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("Привет! Я бот-архитектор. Напиши, что сделать.")
