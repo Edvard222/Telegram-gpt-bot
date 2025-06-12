@@ -14,7 +14,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("Привет! Я бот-архитектор. Напиши, что сделать.")
 
 def ask_gpt_proxyapi(user_message: str) -> str:
-    url = "https://proxyapi.ru/api/v1/chat/completions"
+    url = "https://api.proxyapi.ru/openai/v1/chat/completions"
     headers = {
         "Authorization": f"Bearer {PROXY_API_KEY}",
         "Content-Type": "application/json"
