@@ -45,8 +45,8 @@ def get_purchases(date_from: str, date_to: str):
 
     # Без времени! Только даты
     filter_query = urllib.parse.quote(f"moment>={date_from};moment<={date_to}")
-    url = f"https://api.moysklad.ru/api/remap/1.2/entity/purchaseorder?filter={filter_query}"
-
+    url = f"https://api.moysklad.ru/api/remap/1.2/entity/supply?filter={filter_query}"
+    
     headers = {
         "Authorization": f"Bearer {token}",
         "Accept": "application/json;charset=utf-8",
