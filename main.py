@@ -32,7 +32,6 @@ def ask_gpt_proxyapi(user_message: str) -> str:
     except requests.RequestException as e:
         return f"Ошибка при обращении к GPT: {str(e)}"
 
-from urllib.parse import quote
 
 import urllib.parse
 
