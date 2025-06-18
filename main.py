@@ -30,13 +30,18 @@ def ask_gpt_proxyapi(user_message: str) -> str:
         return response.json()["choices"][0]["message"]["content"]
     except requests.RequestException as e:
         return f"Ошибка при обращении к GPT: {str(e)}"
-
+        
 def get_purchases(date_from: str, date_to: str):
+    token = os.getenv("MOYSKLAD_TOKEN")
+    if not token:
+        return [{"дата": "Ошибка", "товар": "Токен МойСклад не найден", "сумма": 0}]
+
     url = f"https://api.moysklad.ru/api/remap/1.2/entity/purchaseorder?filter=moment>={date_from};moment<={date_to}"
     headers = {
-        "Authorization": f"Bearer {MOYSKLAD_TOKEN}",
-        "Accept-Encoding": "utf-8",
-        "Content-Type": "application/json"
+        "Authorization": f"Bearer {token}",
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "Accept-Encoding": "gzip"
     }
 
     try:
@@ -47,13 +52,13 @@ def get_purchases(date_from: str, date_to: str):
 
         for row in raw.get("rows", []):
             date = row.get("moment", "").split("T")[0]
-            sum_rub = row.get("sum", 0) / 100  # МойСклад возвращает сумму в копейках
+            sum_rub = row.get("sum", 0) / 100
             name = row.get("name", "Без названия")
-            purchases.append({"дата": date, "товар": name, "сумма": sum_rub})
+            purchases.append({"дата": date, "товар": name, "сумма": round(sum_rub, 2)})
 
         return purchases
     except requests.RequestException as e:
-        return [{"дата": "Ошибка", "товар": "Ошибка запроса", "сумма": 0}]
+        return [{"дата": "Ошибка", "товар": f"Ошибка запроса — {str(e)}", "сумма": 0}]
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_message = update.message.text
