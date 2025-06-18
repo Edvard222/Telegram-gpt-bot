@@ -34,6 +34,8 @@ def ask_gpt_proxyapi(user_message: str) -> str:
 
 from urllib.parse import quote
 
+import urllib.parse
+
 def get_purchases(date_from: str, date_to: str):
     token = os.getenv("MOYSKLAD_TOKEN")
     if not token:
@@ -42,8 +44,10 @@ def get_purchases(date_from: str, date_to: str):
     from_iso = f"{date_from}T00:00:00"
     to_iso = f"{date_to}T23:59:59"
 
-    # Исправлено: без кавычек!
-    url = f"https://api.moysklad.ru/api/remap/1.2/entity/purchaseorder?filter=moment>={from_iso};moment<={to_iso}"
+    # Кодируем фильтр
+    filter_query = urllib.parse.quote(f"moment>={from_iso};moment<={to_iso}")
+
+    url = f"https://api.moysklad.ru/api/remap/1.2/entity/purchaseorder?filter={filter_query}"
 
     headers = {
         "Authorization": f"Bearer {token}",
@@ -73,7 +77,6 @@ def get_purchases(date_from: str, date_to: str):
 
     except requests.RequestException as e:
         return [{"дата": "Ошибка", "товар": f"Ошибка запроса — {str(e)}", "сумма": 0}]
-
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_message = update.message.text
 
