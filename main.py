@@ -38,7 +38,6 @@ def get_purchases(date_from: str, date_to: str):
     if not token:
         return [{"дата": "Ошибка", "товар": "Токен МойСклад не найден", "сумма": 0}]
 
-    # Приводим даты к ISO формату с временем
     from_iso = f"{date_from}T00:00:00"
     to_iso = f"{date_to}T23:59:59"
 
@@ -51,7 +50,14 @@ def get_purchases(date_from: str, date_to: str):
 
     try:
         response = requests.get(url, headers=headers, timeout=10)
-        response.raise_for_status()
+        if response.status_code != 200:
+            return [{
+                "дата": "Ошибка",
+                "товар": f"Код {response.status_code} — {response.reason}",
+                "сумма": 0,
+                "детали": response.text  # ← добавим детали ошибки от API
+            }]
+
         raw = response.json()
         purchases = []
 
@@ -62,6 +68,7 @@ def get_purchases(date_from: str, date_to: str):
             purchases.append({"дата": date, "товар": name, "сумма": round(sum_rub, 2)})
 
         return purchases
+
     except requests.RequestException as e:
         return [{"дата": "Ошибка", "товар": f"Ошибка запроса — {str(e)}", "сумма": 0}]
 
