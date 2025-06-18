@@ -16,9 +16,10 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 def ask_gpt_proxyapi(user_message: str) -> str:
     url = "https://api.proxyapi.ru/openai/v1/chat/completions"
     headers = {
-        "Authorization": f"Bearer {PROXY_API_KEY}",
-        "Content-Type": "application/json"
-    }
+    "Authorization": f"Bearer {token}",
+    "Accept": "application/json;charset=utf-8",  # ← исправлено
+    "Content-Type": "application/json"
+}
     data = {
         "model": "gpt-3.5-turbo",
         "messages": [{"role": "user", "content": user_message}]
