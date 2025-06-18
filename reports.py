@@ -1,10 +1,10 @@
 from collections import defaultdict
 
 def generate_report(purchases):
-    # Группируем по складу
     grouped = defaultdict(list)
     for p in purchases:
-        grouped[p["склад"]].append(p)
+        sklad = p.get("склад", "Не указан")  # Защита от KeyError
+        grouped[sklad].append(p)
 
     lines = ["📦 📦 Отчёт по закупкам:"]
     total = 0
