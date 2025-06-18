@@ -32,7 +32,7 @@ def ask_gpt_proxyapi(user_message: str) -> str:
     except requests.RequestException as e:
         return f"Ошибка при обращении к GPT: {str(e)}"
 
-from datetime import datetime
+from urllib.parse import quote
 
 def get_purchases(date_from: str, date_to: str):
     token = os.getenv("MOYSKLAD_TOKEN")
@@ -42,13 +42,12 @@ def get_purchases(date_from: str, date_to: str):
     from_iso = f"{date_from}T00:00:00"
     to_iso = f"{date_to}T23:59:59"
 
-    url = (
-        f"https://api.moysklad.ru/api/remap/1.2/entity/purchaseorder"
-        f"?filter=moment>={from_iso};moment<={to_iso}"
-    )
+    filter_param = quote(f'moment>="{from_iso}";moment<="{to_iso}"')
+    url = f"https://api.moysklad.ru/api/remap/1.2/entity/purchaseorder?filter={filter_param}"
+
     headers = {
         "Authorization": f"Bearer {token}",
-        "Accept": "application/json;charset=utf-8",  # <-- строго так
+        "Accept": "application/json;charset=utf-8",
         "Content-Type": "application/json"
     }
 
