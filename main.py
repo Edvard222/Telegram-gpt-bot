@@ -66,18 +66,17 @@ def get_purchases(date_from: str, date_to: str):
         raw = response.json()
         purchases = []
 
-      for row in raw.get("rows", []):
-    date = row.get("moment", "").replace("T", " ")[:19]
-    sum_rub = row.get("sum", 0) / 100
-    name = row.get("name", "Без названия")
-    store = row.get("store", {}).get("name", "Не указан склад")
-    purchases.append({
-        "дата": date,
-        "товар": name,
-        "сумма": round(sum_rub, 2),
-        "склад": store
-    })
-            purchases.append({"дата": date, "товар": name, "сумма": round(sum_rub, 2)})
+        for row in raw.get("rows", []):
+            date = row.get("moment", "").replace("T", " ")[:19]
+            sum_rub = row.get("sum", 0) / 100
+            name = row.get("name", "Без названия")
+            store = row.get("store", {}).get("name", "Не указан склад")
+            purchases.append({
+                "дата": date,
+                "товар": name,
+                "сумма": round(sum_rub, 2),
+                "склад": store
+            })
 
         return purchases
 
