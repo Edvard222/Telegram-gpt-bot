@@ -43,14 +43,11 @@ def get_purchases(date_from: str, date_to: str):
     if not token:
         return [{"дата": "Ошибка", "товар": "Токен МойСклад не найден", "сумма": 0}]
 
-    # Указываем полный временной интервал
-date_from = "2025-06-05"
-date_to = "2025-06-10"
-filter_query = urllib.parse.quote(
-    f'moment>="{date_from} 00:00:00";moment<="{date_to} 23:59:59"'
-)
-url = f"https://api.moysklad.ru/api/remap/1.2/entity/supply?filter={filter_query}"
-    
+    filter_query = urllib.parse.quote(
+        f'moment>="{date_from} 00:00:00";moment<="{date_to} 23:59:59"'
+    )
+    url = f"https://api.moysklad.ru/api/remap/1.2/entity/supply?filter={filter_query}"
+
     headers = {
         "Authorization": f"Bearer {token}",
         "Accept": "application/json;charset=utf-8",
