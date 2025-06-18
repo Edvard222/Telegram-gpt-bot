@@ -80,8 +80,10 @@ def get_purchases(date_from: str, date_to: str):
 import re
 from datetime import datetime
 import locale
-
-locale.setlocale(locale.LC_TIME, 'ru_RU.UTF-8')  # Только для Linux-систем с русским языком
+try:
+    locale.setlocale(locale.LC_TIME, 'ru_RU.UTF-8')
+except locale.Error:
+    locale.setlocale(locale.LC_TIME, '')  # использовать системную локаль как fallback
 
 def parse_date_period(text: str):
     pattern = r"с\s+(\d{1,2})\s+([а-яА-Я]+)\s+по\s+(\d{1,2})\s+([а-яА-Я]+)"
