@@ -37,16 +37,15 @@ def ask_gpt_proxyapi(user_message: str) -> str:
         return f"Ошибка при обращении к GPT: {str(e)}"
 
 # Получение закупок из МойСклад
-
 def get_purchases(date_from: str, date_to: str):
     token = os.getenv("MOYSKLAD_TOKEN")
     if not token:
         return [{"дата": "Ошибка", "товар": "Токен МойСклад не найден", "сумма": 0}]
 
-filter_query = urllib.parse.quote(
-    f'moment>={date_from}T00:00:00;moment<={date_to}T23:59:59'
-)
-    
+    # Формируем фильтр с корректным форматом времени и URL-кодированием
+    raw_filter = f'moment>={date_from} 00:00:00;moment<={date_to} 23:59:59'
+    filter_query = urllib.parse.quote(raw_filter)
+
     url = f"https://api.moysklad.ru/api/remap/1.2/entity/supply?filter={filter_query}"
 
     headers = {
