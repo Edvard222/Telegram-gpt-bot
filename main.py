@@ -83,8 +83,38 @@ def get_purchases(date_from: str, date_to: str):
     except requests.RequestException as e:
         return [{"дата": "Ошибка", "товар": f"Ошибка запроса — {str(e)}", "сумма": 0}]
 
-from datetime import datetime
-from utils import parse_date_period  # убедись, что эта функция есть
+import re
+from datetime import datetime, timedelta
+
+MONTHS = {
+    "января": "01", "февраля": "02", "марта": "03", "апреля": "04",
+    "мая": "05", "июня": "06", "июля": "07", "августа": "08",
+    "сентября": "09", "октября": "10", "ноября": "11", "декабря": "12"
+}
+
+def parse_date_period(text: str):
+    text = text.lower()
+    today = datetime.now()
+    
+    if "сегодня" in text:
+        date = today.strftime("%Y-%m-%d")
+        return date, date
+
+    if "вчера" in text:
+        date = (today - timedelta(days=1)).strftime("%Y-%m-%d")
+        return date, date
+
+    match = re.search(r"с (\d{1,2}) (\w+) по (\d{1,2}) (\w+)", text)
+    if match:
+        d1, m1, d2, m2 = match.groups()
+        m1 = MONTHS.get(m1, "01")
+        m2 = MONTHS.get(m2, "01")
+        y = str(today.year)
+        date_from = f"{y}-{m1}-{int(d1):02d}"
+        date_to = f"{y}-{m2}-{int(d2):02d}"
+        return date_from, date_to
+
+    return None, None
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_message = update.message.text.lower()
