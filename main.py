@@ -43,8 +43,11 @@ def get_purchases(date_from: str, date_to: str):
     if not token:
         return [{"дата": "Ошибка", "товар": "Токен МойСклад не найден", "сумма": 0}]
 
-    # Без времени! Только даты
-    filter_query = urllib.parse.quote(f"moment>={date_from};moment<={date_to}")
+    # Указываем полный временной интервал
+    date_from_full = f"{date_from}T00:00:00"
+    date_to_full = f"{date_to}T23:59:59"
+
+    filter_query = urllib.parse.quote(f"moment>={date_from_full};moment<={date_to_full}")
     url = f"https://api.moysklad.ru/api/remap/1.2/entity/supply?filter={filter_query}"
     
     headers = {
@@ -66,7 +69,7 @@ def get_purchases(date_from: str, date_to: str):
         purchases = []
 
         for row in raw.get("rows", []):
-            date = row.get("moment", "").split("T")[0]
+            date = row.get("moment", "").replace("T", " ")[:19]
             sum_rub = row.get("sum", 0) / 100
             name = row.get("name", "Без названия")
             purchases.append({"дата": date, "товар": name, "сумма": round(sum_rub, 2)})
@@ -75,32 +78,6 @@ def get_purchases(date_from: str, date_to: str):
 
     except requests.RequestException as e:
         return [{"дата": "Ошибка", "товар": f"Ошибка запроса — {str(e)}", "сумма": 0}]
-# Обработка входящих сообщений
-
-import re
-from datetime import datetime
-import locale
-try:
-    locale.setlocale(locale.LC_TIME, 'ru_RU.UTF-8')
-except locale.Error:
-    locale.setlocale(locale.LC_TIME, '')  # использовать системную локаль как fallback
-
-def parse_date_period(text: str):
-    pattern = r"с\s+(\d{1,2})\s+([а-яА-Я]+)\s+по\s+(\d{1,2})\s+([а-яА-Я]+)"
-    match = re.search(pattern, text.lower())
-
-    if not match:
-        return None, None
-
-    day_from, month_from, day_to, month_to = match.groups()
-
-    try:
-        year = datetime.now().year
-        date_from = datetime.strptime(f"{day_from} {month_from} {year}", "%d %B %Y").date()
-        date_to = datetime.strptime(f"{day_to} {month_to} {year}", "%d %B %Y").date()
-        return date_from.isoformat(), date_to.isoformat()
-    except Exception:
-        return None, None
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_message = update.message.text.lower()
