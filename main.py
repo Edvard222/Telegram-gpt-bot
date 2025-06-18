@@ -83,21 +83,39 @@ def get_purchases(date_from: str, date_to: str):
     except requests.RequestException as e:
         return [{"дата": "Ошибка", "товар": f"Ошибка запроса — {str(e)}", "сумма": 0}]
 
+from datetime import datetime
+from utils import parse_date_period  # убедись, что эта функция есть
+
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_message = update.message.text.lower()
 
-    if "приемки" in user_message and "с" in user_message and "по" in user_message:
-        date_from, date_to = parse_date_period(user_message)
-        if date_from and date_to:
-            report = get_purchases(date_from, date_to)  # пока те же данные, можешь позже заменить на get_receipts
-            result = generate_report(report)
-            await update.message.reply_text(f"📦 {result}")
-        else:
-            await update.message.reply_text("❗Не смог распознать даты. Пример: 'приемки с 5 июня по 10 июня'")
-    elif "закупки" in user_message:
-        report = get_purchases("2025-06-01", "2025-06-09")
+    # Распознаём даты (если есть)
+    date_from, date_to = parse_date_period(user_message)
+
+    if not date_from:
+        # Если даты не распознаны, берем "сегодня"
+        today = datetime.now().strftime("%Y-%m-%d")
+        date_from = date_to = today
+
+    # Закупки
+    if "закупки" in user_message:
+        report = get_purchases(date_from, date_to)
         result = generate_report(report)
-        await update.message.reply_text(f"📦 {result}")
+        await update.message.reply_text(f"📦 Закупки с {date_from} по {date_to}:\n\n{result}")
+    
+    # Продажи
+    elif "продажи" in user_message:
+        report = get_sales(date_from, date_to)  # ты напишешь эту функцию позже
+        result = generate_sales_report(report)
+        await update.message.reply_text(f"💸 Продажи с {date_from} по {date_to}:\n\n{result}")
+    
+    # Отгрузки
+    elif "отгрузки" in user_message:
+        report = get_shipments(date_from, date_to)  # функция для отгрузок
+        result = generate_shipments_report(report)
+        await update.message.reply_text(f"🚚 Отгрузки с {date_from} по {date_to}:\n\n{result}")
+    
+    # По умолчанию — отправить в GPT
     else:
         gpt_reply = ask_gpt_proxyapi(user_message)
         await update.message.reply_text(gpt_reply)
