@@ -50,12 +50,13 @@ def get_purchases(date_from: str, date_to: str):
 
     try:
         response = requests.get(url, headers=headers, timeout=10)
-      if response.status_code != 200:
-    return [{
-        "дата": "Ошибка",
-        "товар": f"{response.text}",  # показываем весь текст ошибки
-        "сумма": 0
-    }]
+
+        if response.status_code != 200:
+            return [{
+                "дата": "Ошибка",
+                "товар": f"{response.text}",
+                "сумма": 0
+            }]
 
         raw = response.json()
         purchases = []
