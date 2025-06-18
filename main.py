@@ -37,20 +37,19 @@ def ask_gpt_proxyapi(user_message: str) -> str:
         return f"Ошибка при обращении к GPT: {str(e)}"
 
 # Получение закупок из МойСклад
+
 def get_purchases(date_from: str, date_to: str):
-    if not MOYSKLAD_TOKEN:
+    token = os.getenv("MOYSKLAD_TOKEN")
+    if not token:
         return [{"дата": "Ошибка", "товар": "Токен МойСклад не найден", "сумма": 0}]
 
-    from_iso = f"{date_from}T00:00:00"
-    to_iso = f"{date_to}T23:59:59"
-
-    # Кодируем фильтр
-    filter_query = urllib.parse.quote(f"moment>={from_iso};moment<={to_iso}")
+    # Без времени! Только даты
+    filter_query = urllib.parse.quote(f"moment>={date_from};moment<={date_to}")
     url = f"https://api.moysklad.ru/api/remap/1.2/entity/purchaseorder?filter={filter_query}"
 
     headers = {
-        "Authorization": f"Bearer {MOYSKLAD_TOKEN}",
-        "Accept": "application/json;charset=utf-8",  # ✅ важно!
+        "Authorization": f"Bearer {token}",
+        "Accept": "application/json;charset=utf-8",
         "Content-Type": "application/json"
     }
 
@@ -72,14 +71,10 @@ def get_purchases(date_from: str, date_to: str):
             name = row.get("name", "Без названия")
             purchases.append({"дата": date, "товар": name, "сумма": round(sum_rub, 2)})
 
-        if not purchases:
-            return [{"дата": "Нет данных", "товар": "Закупок не найдено", "сумма": 0}]
-
         return purchases
 
     except requests.RequestException as e:
         return [{"дата": "Ошибка", "товар": f"Ошибка запроса — {str(e)}", "сумма": 0}]
-
 # Обработка входящих сообщений
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_message = update.message.text
