@@ -1,21 +1,20 @@
-def generate_report(data: list) -> str:
-    if not data:
-        return "❗Нет данных по закупкам."
+from collections import defaultdict
 
-    report_lines = ["📦 Отчёт по закупкам:"]
+def generate_report(purchases):
+    # Группируем по складу
+    grouped = defaultdict(list)
+    for p in purchases:
+        grouped[p["склад"]].append(p)
+
+    lines = ["📦 📦 Отчёт по закупкам:"]
     total = 0
 
-    for row in data:
-        date = row.get("дата", "не указано")
-        product = row.get("товар", "неизвестно")
-        try:
-            amount = float(row.get("сумма", 0))
-        except (ValueError, TypeError):
-            amount = 0
+    for sklad in sorted(grouped):  # Сортировка складов по алфавиту
+        lines.append(f"\n🏬 Склад: {sklad}")
+        # Сортировка по дате внутри склада
+        for row in sorted(grouped[sklad], key=lambda x: x["дата"]):
+            lines.append(f'{row["дата"]}: {row["товар"]} — {row["сумма"]} руб.')
+            total += row["сумма"]
 
-        line = f"{date}: {product} — {amount:.2f} руб."
-        report_lines.append(line)
-        total += amount
-
-    report_lines.append(f"\n💰 Итого: {total:.2f} руб.")
-    return "\n".join(report_lines)
+    lines.append(f"\n💰 Итого: {round(total, 2)} руб.")
+    return "\n".join(lines)
