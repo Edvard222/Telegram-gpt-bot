@@ -42,12 +42,12 @@ def get_purchases(date_from: str, date_to: str):
     from_iso = f"{date_from}T00:00:00"
     to_iso = f"{date_to}T23:59:59"
 
-    filter_param = quote(f'moment>="{from_iso}";moment<="{to_iso}"')
-    url = f"https://api.moysklad.ru/api/remap/1.2/entity/purchaseorder?filter={filter_param}"
+    # Простой и корректный способ — использовать `..` как диапазон
+    url = f"https://api.moysklad.ru/api/remap/1.2/entity/purchaseorder?filter=moment={from_iso}..{to_iso}"
 
     headers = {
         "Authorization": f"Bearer {token}",
-        "Accept": "application/json;charset=utf-8",
+        "Accept": "application/json;charset=utf-8",  # важно!
         "Content-Type": "application/json"
     }
 
