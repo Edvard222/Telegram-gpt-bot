@@ -1,9 +1,6 @@
 import os
+import requests
+from dotenv import load_dotenv
 
-def get_purchases(date_from: str, date_to: str):
-    # Здесь должен быть запрос в API МойСклад
-    # Сейчас — просто пример данных
-    return [
-        {"дата": "2025-05-03", "товар": "Мука", "сумма": 1200},
-        {"дата": "2025-05-10", "товар": "Мясо", "сумма": 3400},
-    ]
+load_dotenv()
+MOYSKLAD_TOKEN = os.getenv("MOYSKLAD_TOKEN")
