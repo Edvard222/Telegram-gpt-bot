@@ -76,15 +76,47 @@ def get_purchases(date_from: str, date_to: str):
     except requests.RequestException as e:
         return [{"дата": "Ошибка", "товар": f"Ошибка запроса — {str(e)}", "сумма": 0}]
 # Обработка входящих сообщений
-async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_message = update.message.text
 
-    if "закупки" in user_message.lower():
+import re
+from datetime import datetime
+import locale
+
+locale.setlocale(locale.LC_TIME, 'ru_RU.UTF-8')  # Только для Linux-систем с русским языком
+
+def parse_date_period(text: str):
+    pattern = r"с\s+(\d{1,2})\s+([а-яА-Я]+)\s+по\s+(\d{1,2})\s+([а-яА-Я]+)"
+    match = re.search(pattern, text.lower())
+
+    if not match:
+        return None, None
+
+    day_from, month_from, day_to, month_to = match.groups()
+
+    try:
+        year = datetime.now().year
+        date_from = datetime.strptime(f"{day_from} {month_from} {year}", "%d %B %Y").date()
+        date_to = datetime.strptime(f"{day_to} {month_to} {year}", "%d %B %Y").date()
+        return date_from.isoformat(), date_to.isoformat()
+    except Exception:
+        return None, None
+
+async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_message = update.message.text.lower()
+
+    if "приемки" in user_message and "с" in user_message and "по" in user_message:
+        date_from, date_to = parse_date_period(user_message)
+        if date_from and date_to:
+            report = get_purchases(date_from, date_to)  # пока те же данные, можешь позже заменить на get_receipts
+            result = generate_report(report)
+            await update.message.reply_text(f"📦 {result}")
+        else:
+            await update.message.reply_text("❗Не смог распознать даты. Пример: 'приемки с 5 июня по 10 июня'")
+    elif "закупки" in user_message:
         report = get_purchases("2025-06-01", "2025-06-09")
         result = generate_report(report)
-        await update.message.reply_text(f"📦 📦 Отчёт по закупкам:\n{result}")
+        await update.message.reply_text(f"📦 {result}")
     else:
-        gpt_reply = await asyncio.to_thread(ask_gpt_proxyapi, user_message)
+        gpt_reply = ask_gpt_proxyapi(user_message)
         await update.message.reply_text(gpt_reply)
 
 # Запуск бота
